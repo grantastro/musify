@@ -1,20 +1,19 @@
-const form = document.getElementById('form');
-const search = document.getElementById('search');
-const result = document.getElementById('result');
-const more = document.getElementById('more');
+const form = document.getElementById("form");
+const search = document.getElementById("search");
+const result = document.getElementById("result");
+const more = document.getElementById("more");
 
-const apiURL = 'https://api.lyrics.ovh';
+const apiURL = "https://api.lyrics.ovh";
 
 async function searchSongs(term) {
-	const res = await fetch(`${apiURL}/suggest/${term}`);
-	const data = await res.json();
+  const res = await fetch(`${apiURL}/suggest/${term}`);
+  const data = await res.json();
 
-	showData(data);
+  showData(data);
 }
 
-
 function showData(data) {
-	result.innerHTML = `
+  result.innerHTML = `
     <ul class="songs">
       ${data.data
         .map(
@@ -23,74 +22,78 @@ function showData(data) {
       <button class="btn" data-artist="${song.artist.name}" data-songtitle="${song.title}">Lyrics</button>
     </li>`
         )
-        .join('')}
+        .join("")}
     </ul>
 	`;
 
-	if (data.prev || data.next) {
-		more.innerHTML = `
+  if (data.prev || data.next) {
+    more.innerHTML = `
       ${
         data.prev
           ? `<button class="btn" onclick="getMoreSongs('${data.prev}')"><i class="fas fa-chevron-circle-left"></i></button>`
-          : ''
+          : ""
       }
       ${
         data.next
           ? `<button class="btn" onclick="getMoreSongs('${data.next}')"><i class="fas fa-chevron-circle-right"></i></button>`
-          : ''
+          : ""
       }
     `;
-	} else {
-		more.innerHTML = '';
-	}
+  } else {
+    more.innerHTML = "";
+  }
 }
 
 async function getMoreSongs(url) {
-	const res = await fetch(`https://cors-anywhere.herokuapp.com/${url}`);
-	const data = await res.json();
+  const res = await fetch(`https://cors-anywhere.herokuapp.com/${url}`);
+  const data = await res.json();
 
-	showData(data);
+  showData(data);
 }
 
 async function getLyrics(artist, songTitle) {
-	const res = await fetch(`${apiURL}/v1/${artist}/${songTitle}`);
-	const data = await res.json();
+  const res = await fetch(`${apiURL}/v1/${artist}/${songTitle}`);
+  const data = await res.json();
 
-	const lyrics = data.lyrics.replace(/(\r\n|\r|\n)/g, '<br>');
+  const lyrics = data.lyrics.replace(/(\r\n|\r|\n)/g, "<br>");
 
-	result.innerHTML = `<h2><strong>${artist}</strong> - ${songTitle}</h2>
+  result.innerHTML = `<h2><strong>${artist}</strong> - ${songTitle}</h2>
   <span>${lyrics}</span>`;
 
-	more.innerHTML = '';
+  more.innerHTML = "";
 }
 
+form.addEventListener("submit", e => {
+  e.preventDefault();
 
+  const searchTerm = search.value.trim();
 
-form.addEventListener('submit', e => {
-	e.preventDefault();
-
-	const searchTerm = search.value.trim();
-
-	if (!searchTerm) {
-		search.classList.remove('search-base');
-		search.classList.add('search-error');
-		search.placeholder = 'Please type in search term...';
-
-	} else {
-		search.classList.remove('search-error');
-		search.classList.add('search-base');
-		search.placeholder = 'Enter Artist or Song...';
-		searchSongs(searchTerm);
-	}
+  if (!searchTerm) {
+    search.classList.remove("search-base");
+    search.classList.add("search-error");
+    search.placeholder = "Please type in search term...";
+  } else {
+    search.classList.remove("search-error");
+    search.classList.add("search-base");
+    search.placeholder = "Enter Artist or Song...";
+    searchSongs(searchTerm);
+  }
 });
 
-result.addEventListener('click', e => {
-	const clickedEl = e.target;
+result.addEventListener("click", e => {
+  const clickedEl = e.target;
 
-	if (clickedEl.tagName === 'BUTTON') {
-		const artist = clickedEl.getAttribute('data-artist');
-		const songTitle = clickedEl.getAttribute('data-songtitle');
+  if (clickedEl.tagName === "BUTTON") {
+    const artist = clickedEl.getAttribute("data-artist");
+    const songTitle = clickedEl.getAttribute("data-songtitle");
 
-		getLyrics(artist, songTitle);
-	}
+    getLyrics(artist, songTitle);
+  }
+});
+
+search.addEventListener("click", e => {
+  e.preventDefault();
+  search.classList.remove("search-error");
+  search.classList.add("search-base");
+  search.placeholder = "Enter Artist or Song...";
 });
